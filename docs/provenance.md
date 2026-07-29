@@ -12,6 +12,9 @@ Behavior was retained only after comparing source, saved outputs, and documentat
 Direct differential checks found:
 
 - zero differences across all ten saved five-view query transformations; and
+- byte-identical ordering, scores, and metadata across all 10,000 dense candidates
+  when retaining the historical fresh-model-per-view lifecycle (artifact SHA-256
+  `8c4d5c617fd9c1f04981db5a4765d254a0b0055b759fd432d705e4f1cd6be5b8`); and
 - zero citation-extraction differences across 3,577 occurrences in the first 100
   audited reranker documents.
 

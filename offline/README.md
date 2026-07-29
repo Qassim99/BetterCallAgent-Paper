@@ -52,6 +52,11 @@ uv run --locked python -m offline.run --config runs/paper_validation.toml
 Edit only the copied configuration. Do not put secrets in TOML. The output directory
 must be new or empty.
 
+Dense retrieval loads and releases one pinned Qwen encoder per view. This
+`fresh_per_field` lifecycle is part of the paper configuration: sharing a model
+instance across the five left-padded batches changes the historical metadata-view
+ranking.
+
 The exact dense index is an external, hash-verified input. No index builder is
 included in this release; see [indexing/README.md](indexing/README.md).
 

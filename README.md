@@ -220,7 +220,9 @@ uv run --locked python -m offline.run \
 
 The strict runner checks every input checksum, requires complete score coverage,
 records resolved configuration and provenance, and rejects a non-empty output
-directory. Its output is a fresh result.
+directory. Stage 1 constructs a fresh pinned Qwen encoder for each of the five
+retrieval views, matching the historical model lifecycle; this setting is recorded
+as `encoder_lifecycle = "fresh_per_field"`. Its output is a fresh result.
 
 The exact historical dense index is approximately 40.5 GB. No index builder is
 included in this release. The audited index manifest did not record the embedding

@@ -40,6 +40,10 @@ metadata, scans matrix chunks with exact inner products, and keeps only fused ro
 memory. A compatible GPU is recommended; CPU execution is supported by configuration
 but is substantially slower.
 
+Query encoding constructs and releases one pinned model instance per retrieval
+field. This `fresh_per_field` lifecycle matches the audited run and is part of the
+retrieval provenance rather than an interchangeable performance optimization.
+
 The index is not stored in Git and currently has no DOI or stable download URL.
 Obtain the authorized artifact from the authors, place it at
 `artifacts/downloads/index/qwen3_embedding_8b`, and verify it:
