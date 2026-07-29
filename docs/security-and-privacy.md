@@ -22,8 +22,10 @@ TLS verification is enabled. The release does not offer a configuration switch t
 silently disables certificate validation.
 
 Predecessor development history may have contained live credentials. All potentially
-affected credentials must be rotated before publication, and predecessor Git objects
-must not be included in the clean release history.
+affected credentials must be rotated immediately, and predecessor Git objects must
+not be included in the clean release history.
 
-Public release also requires an approved software license, contributor agreement, and
-confirmation that every distributed data or derived artifact may be redistributed.
+Public source visibility is separate from an open-source or complete artifact
+release. The latter still requires an approved software license, contributor
+agreement, completed credential rotation, and confirmation that every distributed
+data or derived artifact may be redistributed.

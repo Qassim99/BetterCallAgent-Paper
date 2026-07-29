@@ -33,7 +33,8 @@ The audited predecessor development history may have contained potentially live
 credentials. All affected credentials must be rotated, and that history must remain
 outside the clean release repository.
 
-Public release is blocked until:
+The clean source repository may be publicly visible, but it must not be presented as
+an open-source or complete artifact release until:
 
 - credential rotation is complete;
 - the source history passes `python scripts/check_release.py`;
