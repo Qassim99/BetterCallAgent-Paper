@@ -13,6 +13,11 @@ The online demonstration and offline benchmark deliberately share small audited
 primitives without pretending to be the same experiment. Gold labels are available
 only to offline evaluation and diagnostic code.
 
+## Demo video
+
+[Watch or download the BetterCallAgent demo video](https://github.com/Qassim99/BetterCallAgent-Paper/releases/download/demo-video-v1/Videoprojekt.mp4)
+(MP4, 675 MiB).
+
 > **Artifact status:** this repository is source-only. The external artifact set has
 > checksums but currently has no DOI or stable download URL. This release therefore
 > provides source and a checksum manifest; full reproduction is blocked until the
