@@ -15,7 +15,6 @@ import sys
 import tomllib
 from collections.abc import Mapping
 from datetime import UTC, datetime
-from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -450,8 +449,7 @@ async def run_pipeline(
             raise ValueError(
                 "Configured embedding model/revision must exactly match the index manifest."
             )
-        encoder_factory = partial(
-            QwenEmbeddingEncoder,
+        encoder = QwenEmbeddingEncoder(
             model=retrieval_model,
             revision=retrieval_revision,
             device=retrieval_device,
@@ -462,7 +460,7 @@ async def run_pipeline(
         dense_candidates, dense_summary = retrieve_from_index(
             queries_path=queries_path,
             index_dir=index_dir,
-            encoder_factory=encoder_factory,
+            encoder=encoder,
             model=retrieval_model,
             model_revision=retrieval_revision,
             top_k=retrieval_field_top_k,
@@ -618,8 +616,15 @@ async def run_pipeline(
                 "rrf_k": retrieval_rrf_k,
                 "weights": weights,
                 "attention_implementation": "sdpa",
-                "encoder_lifecycle": ("fresh_per_field" if mode == "full" else "saved_rankings"),
+                "encoder_lifecycle": (
+                    "shared_across_fields" if mode == "full" else "saved_rankings"
+                ),
                 "model_placement": "single_device_map" if mode == "full" else "saved_rankings",
+                "query_text_preparation": (
+                    "preserve_nonblank_whitespace_blank_to_single_space"
+                    if mode == "full"
+                    else "saved_rankings"
+                ),
             },
             "reranking": {
                 "model": reranker_model,
@@ -653,8 +658,13 @@ async def run_pipeline(
             "embedding_revision": retrieval_revision,
             "index_model_binding": (index_manifest.model_binding if mode == "full" else "fixture"),
             "attention_implementation": "sdpa",
-            "encoder_lifecycle": "fresh_per_field" if mode == "full" else "saved_rankings",
+            "encoder_lifecycle": "shared_across_fields" if mode == "full" else "saved_rankings",
             "model_placement": "single_device_map" if mode == "full" else "saved_rankings",
+            "query_text_preparation": (
+                "preserve_nonblank_whitespace_blank_to_single_space"
+                if mode == "full"
+                else "saved_rankings"
+            ),
             "pooling": "last_token",
             "normalization": "l2",
             "matrix_dtype": "float16",

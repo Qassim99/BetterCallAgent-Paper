@@ -40,10 +40,10 @@ metadata, scans matrix chunks with exact inner products, and keeps only fused ro
 memory. A compatible GPU is recommended; CPU execution is supported by configuration
 but is substantially slower.
 
-Query encoding constructs and releases one pinned model instance per retrieval
-field and loads it directly through a single-device map. This `fresh_per_field`
-lifecycle and placement match the audited run and are part of the retrieval
-provenance rather than interchangeable performance optimizations.
+Query encoding preserves non-blank view strings exactly and maps blank values to one
+space. A single pinned model encodes the fields in canonical order and is released
+before matrix search. The run manifest records the text-preparation contract,
+`shared_across_fields` lifecycle, and single-device placement.
 
 The index is not stored in Git and currently has no DOI or stable download URL.
 Obtain the authorized artifact from the authors, place it at

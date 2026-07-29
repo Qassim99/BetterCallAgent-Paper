@@ -1,4 +1,4 @@
-"""Regression tests for the paper's dense-encoder lifecycle."""
+"""Regression tests for the paper's dense-retrieval invariants."""
 
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from offline.stages.step_01_retrieve_dense import (
     FIELDS,
     QwenEmbeddingEncoder,
     _encode_query_views,
+    _prepare_encoder_texts,
 )
 
 
@@ -42,7 +43,7 @@ class _RecordingEncoder:
         self.events.append(("close", self.identifier, None))
 
 
-class DenseEncoderLifecycleTests(unittest.TestCase):
+class DenseRetrievalRegressionTests(unittest.TestCase):
     def setUp(self) -> None:
         self.views = [
             QueryViews(
@@ -61,28 +62,22 @@ class DenseEncoderLifecycleTests(unittest.TestCase):
             ),
         ]
 
-    def test_uses_one_fresh_encoder_per_field_in_canonical_order(self) -> None:
+    def test_uses_one_encoder_for_fields_in_canonical_order(self) -> None:
         events: list[tuple[str, int, tuple[str, ...] | None]] = []
-        created: list[_RecordingEncoder] = []
-
-        def factory() -> _RecordingEncoder:
-            encoder = _RecordingEncoder(identifier=len(created), events=events)
-            created.append(encoder)
-            return encoder
+        encoder = _RecordingEncoder(identifier=0, events=events)
 
         matrices = _encode_query_views(
             views=self.views,
-            encoder_factory=factory,
+            encoder=encoder,
             expected_dimensions=3,
         )
 
-        self.assertEqual(len(created), len(FIELDS))
         self.assertEqual(list(matrices), list(FIELDS))
         for index, field in enumerate(FIELDS):
             expected_texts = tuple(getattr(view, field) for view in self.views)
-            self.assertEqual(events[index * 2], ("encode", index, expected_texts))
-            self.assertEqual(events[index * 2 + 1], ("close", index, None))
+            self.assertEqual(events[index], ("encode", 0, expected_texts))
             self.assertEqual(matrices[field], expected_texts)
+        self.assertEqual(events[-1], ("close", 0, None))
 
     def test_closes_encoder_when_encoding_fails(self) -> None:
         events: list[tuple[str, int, tuple[str, ...] | None]] = []
@@ -90,7 +85,7 @@ class DenseEncoderLifecycleTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "synthetic encoding failure"):
             _encode_query_views(
                 views=self.views,
-                encoder_factory=lambda: _RecordingEncoder(
+                encoder=_RecordingEncoder(
                     identifier=0,
                     events=events,
                     fail=True,
@@ -103,10 +98,10 @@ class DenseEncoderLifecycleTests(unittest.TestCase):
     def test_closes_encoder_when_dimensions_do_not_match(self) -> None:
         events: list[tuple[str, int, tuple[str, ...] | None]] = []
 
-        with self.assertRaisesRegex(ValueError, "normal_query encoder dimension 2"):
+        with self.assertRaisesRegex(ValueError, "Encoder dimension 2"):
             _encode_query_views(
                 views=self.views,
-                encoder_factory=lambda: _RecordingEncoder(
+                encoder=_RecordingEncoder(
                     identifier=0,
                     events=events,
                     dimensions=2,
@@ -116,17 +111,24 @@ class DenseEncoderLifecycleTests(unittest.TestCase):
 
         self.assertEqual(events, [("close", 0, None)])
 
+    def test_preserves_nonblank_text_and_normalizes_blank_values(self) -> None:
+        self.assertEqual(
+            _prepare_encoder_texts(("  legal query  ", "", "\t\n", "exact")),
+            ["  legal query  ", " ", " ", "exact"],
+        )
+
     def test_loads_model_directly_on_configured_device(self) -> None:
         fake_torch = ModuleType("torch")
         fake_torch.float16 = object()
         fake_torch.float32 = object()
+        fake_torch.cuda = SimpleNamespace(is_available=Mock(return_value=False))
 
         tokenizer = object()
         tokenizer_loader = SimpleNamespace(from_pretrained=Mock(return_value=tokenizer))
         model = SimpleNamespace(
             config=SimpleNamespace(hidden_size=4_096),
-            eval=Mock(),
         )
+        model.eval = Mock(return_value=model)
         model_loader = SimpleNamespace(from_pretrained=Mock(return_value=model))
         fake_transformers = ModuleType("transformers")
         fake_transformers.AutoModel = model_loader

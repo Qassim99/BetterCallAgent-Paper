@@ -52,12 +52,12 @@ uv run --locked python -m offline.run --config runs/paper_validation.toml
 Edit only the copied configuration. Do not put secrets in TOML. The output directory
 must be new or empty.
 
-Dense retrieval loads and releases one pinned Qwen encoder per view. This
-`fresh_per_field` lifecycle is part of the paper configuration: sharing a model
-instance across the five left-padded batches changes the historical metadata-view
-ranking. Each isolated model is loaded directly onto the configured device through a
-single-device map; loading on the host and moving it afterward is not numerically
-equivalent for this artifact.
+Dense retrieval preserves every non-blank query-view string exactly before
+tokenization and maps only blank values to one space. One pinned Qwen encoder serves
+the five views and is released before matrix search. The run manifest records this
+text-preparation contract, the `shared_across_fields` lifecycle, and direct
+single-device placement. Controlled A/B runs found the alternative lifecycle, dtype
+keyword, and placement paths byte-identical.
 
 The exact dense index is an external, hash-verified input. No index builder is
 included in this release; see [indexing/README.md](indexing/README.md).

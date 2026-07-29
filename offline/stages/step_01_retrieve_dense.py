@@ -11,9 +11,8 @@ import argparse
 import gc
 import heapq
 import json
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from functools import partial
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -131,11 +130,21 @@ class TextEncoder(Protocol):
         """Return an L2-normalized float32 matrix in input order."""
 
     def close(self) -> None:
-        """Release model resources after encoding one retrieval view."""
+        """Release model resources after query encoding."""
+
+
+def _prepare_encoder_texts(texts: Sequence[str]) -> list[str]:
+    """Preserve non-blank query text exactly and replace blank values.
+
+    Whitespace is tokenizer input and therefore part of the versioned experiment.
+    The historical pipeline retained it for every non-blank query view.
+    """
+
+    return [text if text.strip() else " " for text in texts]
 
 
 class QwenEmbeddingEncoder:
-    """One isolated Qwen encoder instance for a single retrieval view."""
+    """Pinned Qwen encoder used by explicit full-reproduction runs."""
 
     def __init__(
         self,
@@ -176,8 +185,8 @@ class QwenEmbeddingEncoder:
             dtype=dtype,
             local_files_only=local_files_only,
             low_cpu_mem_usage=True,
-            attn_implementation="sdpa",
             device_map={"": device},
+            attn_implementation="sdpa",
         )
         self._model.eval()
         self.dimensions = int(self._model.config.hidden_size)
@@ -191,7 +200,7 @@ class QwenEmbeddingEncoder:
         batches: list[Any] = []
         with torch.inference_mode():
             for start in range(0, len(texts), self._batch_size):
-                values = [text.strip() or " " for text in texts[start : start + self._batch_size]]
+                values = _prepare_encoder_texts(texts[start : start + self._batch_size])
                 inputs = self._tokenizer(
                     values,
                     padding=True,
@@ -214,11 +223,14 @@ class QwenEmbeddingEncoder:
         return np.vstack(batches).astype(np.float32, copy=False)
 
     def close(self) -> None:
-        """Release this view's model before constructing the next encoder."""
+        """Release model memory before the GPU matrix-search phase."""
 
+        torch = self._torch
         del self._model
         del self._tokenizer
         gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
 
 def _metadata_reference(metadata: Mapping[str, Any]) -> str:
@@ -392,36 +404,26 @@ def _serialize_query(
 def _encode_query_views(
     *,
     views: Sequence[QueryViews],
-    encoder_factory: Callable[[], TextEncoder],
+    encoder: TextEncoder,
     expected_dimensions: int,
 ) -> dict[str, Any]:
-    """Encode each retrieval view with a fresh, promptly released model.
+    """Encode all retrieval views with one model and always release it."""
 
-    Model lifecycle is part of the historical experiment configuration. Sharing
-    one Qwen instance across the five left-padded batches changes the saved
-    ``meta_searchterm`` ranking.
-    """
-
-    matrices: dict[str, Any] = {}
-    for field in FIELDS:
-        encoder = encoder_factory()
-        try:
-            if encoder.dimensions != expected_dimensions:
-                raise ValueError(
-                    f"{field} encoder dimension {encoder.dimensions} "
-                    f"!= index dimension {expected_dimensions}."
-                )
-            matrices[field] = encoder.encode([getattr(view, field) for view in views])
-        finally:
-            encoder.close()
-    return matrices
+    try:
+        if encoder.dimensions != expected_dimensions:
+            raise ValueError(
+                f"Encoder dimension {encoder.dimensions} != index dimension {expected_dimensions}."
+            )
+        return {field: encoder.encode([getattr(view, field) for view in views]) for field in FIELDS}
+    finally:
+        encoder.close()
 
 
 def retrieve_from_index(
     *,
     queries_path: Path,
     index_dir: Path,
-    encoder_factory: Callable[[], TextEncoder],
+    encoder: TextEncoder,
     model: str,
     model_revision: str,
     top_k: int,
@@ -443,7 +445,7 @@ def retrieve_from_index(
     views = [build_query_views(str(query_rows[query_id]["query"])) for query_id in query_ids]
     query_matrices = _encode_query_views(
         views=views,
-        encoder_factory=encoder_factory,
+        encoder=encoder,
         expected_dimensions=manifest.dimensions,
     )
 
@@ -644,8 +646,7 @@ def main(argv: list[str] | None = None) -> int:
         revision = args.model_revision or manifest.model_revision
         if revision != manifest.model_revision:
             raise ValueError("Embedding revision does not match the index manifest.")
-        encoder_factory = partial(
-            QwenEmbeddingEncoder,
+        encoder = QwenEmbeddingEncoder(
             model=args.model,
             revision=revision,
             device=args.device,
@@ -656,7 +657,7 @@ def main(argv: list[str] | None = None) -> int:
         candidates, summary = retrieve_from_index(
             queries_path=args.queries,
             index_dir=index_dir,
-            encoder_factory=encoder_factory,
+            encoder=encoder,
             model=args.model,
             model_revision=revision,
             top_k=args.top_k,
