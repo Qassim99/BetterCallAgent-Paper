@@ -1,8 +1,9 @@
 cff-version: 1.2.0
-message: "Review artifact: final author, paper, repository, and release metadata must be added before publication."
+message: "Review artifact: final author, paper, and release metadata must be added before citation."
 title: "BetterCallAgent: Reproducible Swiss Legal Citation Retrieval"
 type: software
 version: 0.1.0
+repository-code: "https://github.com/Qassim99/BetterCallAgent-Paper"
 abstract: >-
   Source release for a Swiss legal citation-retrieval pipeline, online
   demonstration, and deterministic interpretability analyses. External paper

@@ -278,16 +278,17 @@ new complete run. See [Models](docs/models.md).
 - Real online queries can send questions and selected document excerpts to the
   configured provider. Review its retention, location, and data-processing terms.
 - Historical credentials potentially present in predecessor development history
-  must be rotated before any publication. That history is not part of this clean
-  release.
-- There is currently no open-source license. All rights remain reserved for paper
-  review while the owners decide a license and confirm contributor and data
-  redistribution permissions.
+  must be rotated immediately. That history and its Git objects are not part of this
+  clean repository.
+- This is a public **source snapshot**, not an open-source or complete artifact
+  release. No open-source license has been selected, so all rights remain reserved.
+- Public visibility does not imply that external data, indexes, model outputs, or
+  derived artifacts may be redistributed. Their availability and permissions remain
+  separate release decisions.
 
-**Public release is blocked** until the owners approve a license, confirm
-contributor and redistribution rights, rotate potentially exposed credentials, and
-publish an authorized artifact archive or clearly limit the release to source code.
-See [Security](SECURITY.md), [Third-party notices](NOTICE.md), and
-[License status](LICENSE-PENDING.md).
+Before publishing an open-source or complete artifact release, the owners must
+approve a license, confirm contributor and redistribution rights, complete credential
+rotation, and publish an authorized artifact archive. See [Security](SECURITY.md),
+[Third-party notices](NOTICE.md), and [License status](LICENSE-PENDING.md).
 
 BetterCallAgent is research software, not legal advice.
