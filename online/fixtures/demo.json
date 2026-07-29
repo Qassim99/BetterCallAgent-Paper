@@ -1,0 +1,133 @@
+{
+  "version": 2,
+  "queries": [
+    {
+      "query_id": "demo-contract-delay",
+      "query": "Ein Käufer hat einen verbindlichen Liefertermin vereinbart. Der Verkäufer liefert trotz Mahnung nicht. Unter welchen Voraussetzungen kann der Käufer vom Vertrag zurücktreten und Schadenersatz verlangen?",
+      "split": "fixture"
+    }
+  ],
+  "retrieval_views": {
+    "demo-contract-delay": {
+      "normal_query": "Ein Käufer hat einen verbindlichen Liefertermin vereinbart. Der Verkäufer liefert trotz Mahnung nicht. Unter welchen Voraussetzungen kann der Käufer vom Vertrag zurücktreten und Schadenersatz verlangen?",
+      "meta_searchterm": "Schuldnerverzug Lieferung Mahnung Nachfrist Rücktritt Schadenersatz Schweizer OR",
+      "keywords": "Schuldnerverzug Liefertermin Mahnung Nachfrist Rücktritt Schadenersatz",
+      "fulltext": "Ein Käufer hat einen verbindlichen Liefertermin vereinbart. Der Verkäufer liefert trotz Mahnung nicht. Unter welchen Voraussetzungen kann der Käufer vom Vertrag zurücktreten und Schadenersatz verlangen?",
+      "citations": "Ein Käufer hat einen verbindlichen Liefertermin vereinbart. Der Verkäufer liefert trotz Mahnung nicht. Unter welchen Voraussetzungen kann der Käufer vom Vertrag zurücktreten und Schadenersatz verlangen?"
+    }
+  },
+  "documents": [
+    {
+      "doc_ref": "demo-doc-001",
+      "text": "Bei nicht gehöriger Erfüllung haftet der Schuldner nach Art. 97 Abs. 1 OR für den verursachten Schaden, sofern er nicht beweist, dass ihn kein Verschulden trifft. Nach Art. 102 Abs. 1 OR tritt Verzug grundsätzlich nach einer Mahnung ein.",
+      "court": "Synthetic fixture",
+      "decision_id": "fixture-001"
+    },
+    {
+      "doc_ref": "demo-doc-002",
+      "text": "Art. 102 Abs. 1 OR setzt bei einer fälligen Forderung grundsätzlich eine Mahnung voraus. Ein vertraglicher Schadenersatzanspruch kann sich bei verschuldeter Nichterfüllung aus Art. 97 Abs. 1 OR ergeben.",
+      "court": "Synthetic fixture",
+      "decision_id": "fixture-002"
+    },
+    {
+      "doc_ref": "demo-doc-003",
+      "text": "Bleibt die Leistung nach Ablauf einer angemessenen Nachfrist aus, kann der Gläubiger nach Art. 107 Abs. 2 OR auf die Leistung verzichten oder vom Vertrag zurücktreten. Ein Schadenersatzanspruch beurteilt sich ergänzend nach Art. 97 Abs. 1 OR.",
+      "court": "Synthetic fixture",
+      "decision_id": "fixture-003"
+    },
+    {
+      "doc_ref": "demo-doc-004",
+      "text": "Für vertragliche Pflichtverletzungen beschreibt Art. 97 Abs. 1 OR die Haftung des Schuldners und die Möglichkeit des Exkulpationsbeweises.",
+      "court": "Synthetic fixture",
+      "decision_id": "fixture-004"
+    },
+    {
+      "doc_ref": "demo-doc-005",
+      "text": "Der Rücktritt nach Art. 107 Abs. 2 OR ist von der ausservertraglichen Haftung nach Art. 41 Abs. 1 OR zu unterscheiden; beide Normen haben unterschiedliche Voraussetzungen.",
+      "court": "Synthetic fixture",
+      "decision_id": "fixture-005"
+    }
+  ],
+  "dense_rankings": {
+    "demo-contract-delay": [
+      "demo-doc-001",
+      "demo-doc-002",
+      "demo-doc-003",
+      "demo-doc-004",
+      "demo-doc-005"
+    ]
+  },
+  "bm25_rankings": {
+    "demo-contract-delay": [
+      "demo-doc-003",
+      "demo-doc-001",
+      "demo-doc-005",
+      "demo-doc-002",
+      "demo-doc-004"
+    ]
+  },
+  "fixture_script": {
+    "understanding": {
+      "legal_area": "Schweizer Obligationenrecht",
+      "summary_de": "Zu prüfen sind Schuldnerverzug, Rücktritt nach Nachfrist und vertraglicher Schadenersatz.",
+      "key_facts": [
+        "Verbindlicher Liefertermin",
+        "Ausbleibende Lieferung",
+        "Mahnung durch den Käufer"
+      ],
+      "legal_issues": [
+        "Eintritt des Schuldnerverzugs",
+        "Nachfrist und Rücktritt",
+        "Voraussetzungen des Schadenersatzes"
+      ],
+      "meta_searchterm": "Schuldnerverzug Lieferung Mahnung Nachfrist Rücktritt Schadenersatz Schweizer OR",
+      "keywords": [
+        "Schuldnerverzug",
+        "Liefertermin",
+        "Mahnung",
+        "Nachfrist",
+        "Rücktritt",
+        "Schadenersatz"
+      ]
+    },
+    "query_plan": {
+      "meta_searchterm": "Schuldnerverzug Lieferung Mahnung Nachfrist Rücktritt Schadenersatz Schweizer OR",
+      "keywords": [
+        "Schuldnerverzug",
+        "Liefertermin",
+        "Mahnung",
+        "Nachfrist",
+        "Rücktritt",
+        "Schadenersatz"
+      ]
+    },
+    "rerank": {
+      "demo-doc-001": {
+        "score": 9.7,
+        "confidence": 0.98,
+        "rationale_de": "Behandelt Verzug und vertraglichen Schadenersatz unmittelbar."
+      },
+      "demo-doc-002": {
+        "score": 9.1,
+        "confidence": 0.95,
+        "rationale_de": "Erklärt Mahnung und Schadenersatzanspruch."
+      },
+      "demo-doc-003": {
+        "score": 8.2,
+        "confidence": 0.91,
+        "rationale_de": "Behandelt Nachfrist, Rücktritt und Schadenersatz."
+      },
+      "demo-doc-004": {
+        "score": 7.8,
+        "confidence": 0.87,
+        "rationale_de": "Stützt den vertraglichen Schadenersatz, aber nicht den Rücktritt."
+      },
+      "demo-doc-005": {
+        "score": 4.0,
+        "confidence": 0.82,
+        "rationale_de": "Enthält eine Abgrenzung, ist für den Kernfall nur teilweise relevant."
+      }
+    },
+    "answer": "Der Verkäufer gerät bei Fälligkeit grundsätzlich durch die Mahnung in Verzug (Art. 102 Abs. 1 OR). Für einen Rücktritt muss der Käufer im Regelfall eine angemessene Nachfrist ansetzen; bleibt die Lieferung aus, stehen ihm die Wahlrechte nach Art. 107 Abs. 2 OR offen. Schadenersatz setzt zusätzlich eine Pflichtverletzung, einen Schaden, Kausalität und grundsätzlich Verschulden voraus, wobei Art. 97 Abs. 1 OR die Beweislast für die Exkulpation dem Schuldner zuweist. Die konkrete Vertragsgestaltung und ein allfälliges Fixgeschäft können die Beurteilung verändern. Dies ist keine Rechtsberatung."
+  }
+}

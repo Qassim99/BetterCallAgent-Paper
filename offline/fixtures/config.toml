@@ -1,0 +1,33 @@
+schema_version = 1
+mode = "fixture"
+seed = 19
+run_name = "synthetic_smoke_test"
+
+[paths]
+queries = "offline/fixtures/queries.csv"
+laws = "offline/fixtures/laws.csv"
+courts = "offline/fixtures/courts.csv"
+saved_rankings = "offline/fixtures/retrieval_rankings.jsonl"
+sparse_traces = "offline/fixtures/sparse_traces"
+documents_replay = "offline/fixtures/documents.jsonl"
+reranker_replay = "offline/fixtures/reranker_replay.jsonl"
+output = "runs/synthetic_smoke_test"
+
+[retrieval]
+fusion_top_k = 5
+rrf_k = 60
+weights = { normal_query = 0.40, meta_searchterm = 1.25, keywords = 0.85, fulltext = 1.35, citations = 0.15 }
+
+[reranking]
+model = "fixture-reranker-v1"
+top_n = 5
+batch_size = 5
+concurrency = 1
+
+[citation_gate]
+candidate_top_k = 10
+minimum_dense_votes = 4
+anchor_top_k = 3
+anchor_minimum_score = 8.5
+sparse_top_k = 5
+minimum_sparse_votes = 2

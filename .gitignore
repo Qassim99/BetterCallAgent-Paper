@@ -1,0 +1,73 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+secrets/
+*.secret
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+build/
+dist/
+.runtime/
+snapshots/
+qdrant_storage/
+.qdrant-initialized
+LOG.md
+
+# JavaScript
+node_modules/
+.next/
+.vite/
+frontend/dist/
+frontend/coverage/
+npm-debug.log*
+
+# Runtime output
+runs/
+logs/
+*.log
+*.pid
+*.out
+*.err
+tmp/
+temp/
+
+# Large or generated research artifacts
+artifacts/downloads/
+data/raw/
+data/processed/
+data/private/
+checkpoints/
+models/
+indexes/
+*.f16.memmap
+*.npy
+*.npz
+*.parquet
+*.gguf
+*.safetensors
+*.bin
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.bak

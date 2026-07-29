@@ -1,0 +1,56 @@
+schema_version = 1
+mode = "full"
+seed = 19
+run_name = "paper_validation"
+
+[paths]
+queries = "artifacts/downloads/eval/val.csv"
+laws = "artifacts/downloads/eval/laws_de.csv"
+courts = "artifacts/downloads/eval/court_considerations.csv.gz"
+index = "artifacts/downloads/index/qwen3_embedding_8b"
+document_store = "artifacts/downloads/corpus"
+sparse_traces = "artifacts/downloads/derived/sira_bm25_traces"
+output = "runs/paper_validation"
+
+[retrieval]
+model = "Qwen/Qwen3-Embedding-8B"
+model_revision = "1d8ad4ca9b3dd8059ad90a75d4983776a23d44af"
+device = "cuda:0"
+batch_size = 16
+max_length = 1024
+chunk_size = 30000
+allow_model_download = false
+fields = ["normal_query", "meta_searchterm", "keywords", "fulltext", "citations"]
+field_top_k = 1000
+fusion_top_k = 1000
+rrf_k = 60
+weights = { normal_query = 0.40, meta_searchterm = 1.25, keywords = 0.85, fulltext = 1.35, citations = 0.15 }
+
+[reranking]
+model = "qwen3-30b-a3b-instruct-2507"
+top_n = 10
+batch_size = 5
+concurrency = 1
+timeout_seconds = 300
+max_attempts = 3
+retry_delay_seconds = 1.0
+max_tokens = 4096
+document_char_limit = 0
+base_url_env = "BCA_RERANK_BASE_URL"
+api_key_env = "BCA_RERANK_API_KEY"
+
+[citation_gate]
+candidate_top_k = 10
+minimum_dense_votes = 4
+anchor_top_k = 3
+anchor_minimum_score = 8.5
+sparse_top_k = 5
+minimum_sparse_votes = 2
+
+[integrity]
+queries_sha256 = "41862ef772801995cae80cf5ea947b08e197603aa37ef93aefb632e0d9de5f7f"
+laws_sha256 = "6602c06fbfe83ee9942f05083402fe5265e43df7be6b48748c7be4f52650609e"
+courts_sha256 = "a5adb6ceea4bb057b816800460bcb5b6fded7beb5c4e9e29e3dee5a777077017"
+sparse_traces_tree_sha256 = "a80e96e9ff4d8f10f4d33ec07502de72fbdd54456f08deb40eea3c881aa26ae6"
+dense_index_tree_sha256 = "e5b12c92060fc44e9ee04b57e683fb753d842d146f3a768b0cad8265e6131a23"
+document_store_tree_sha256 = "c86df340ff64347517a8385994f8e92315745ef482300246fa501f5c37d90abd"

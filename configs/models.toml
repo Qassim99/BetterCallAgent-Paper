@@ -1,0 +1,30 @@
+schema_version = 1
+
+[validated]
+reranker = "qwen3-30b-a3b-instruct-2507"
+embedding = "Qwen/Qwen3-Embedding-8B"
+embedding_revision = "1d8ad4ca9b3dd8059ad90a75d4983776a23d44af"
+scope = "Incomplete ten-query validation experiment: 19/20 batches and 95/100 scores; see docs/limitations.md."
+
+[recommended.deepseek_v4_flash]
+display_name = "DeepSeek V4 Flash"
+official_local_id = "deepseek-ai/DeepSeek-V4-Flash"
+provider_example_id = "deepseek/deepseek-v4-flash"
+role = "Fast hosted reranker"
+validated_for_reported_result = false
+reference = "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash"
+
+[recommended.qwen_3_6_27b]
+display_name = "Qwen3.6-27B"
+default_id = "Qwen/Qwen3.6-27B"
+role = "Open-weight local reranker"
+validated_for_reported_result = false
+reference = "https://huggingface.co/Qwen/Qwen3.6-27B"
+
+[recommended.soofi]
+display_name = "Soofi S"
+provider_example_id = "Soofi-S-Instruct"
+availability = "Early access; no generally downloadable checkpoint as of 2026-07-29"
+role = "German/English model; provider ID is deployment-specific"
+validated_for_reported_result = false
+reference = "https://www.soofi.info/"
