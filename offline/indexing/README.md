@@ -41,8 +41,9 @@ memory. A compatible GPU is recommended; CPU execution is supported by configura
 but is substantially slower.
 
 Query encoding constructs and releases one pinned model instance per retrieval
-field. This `fresh_per_field` lifecycle matches the audited run and is part of the
-retrieval provenance rather than an interchangeable performance optimization.
+field and loads it directly through a single-device map. This `fresh_per_field`
+lifecycle and placement match the audited run and are part of the retrieval
+provenance rather than interchangeable performance optimizations.
 
 The index is not stored in Git and currently has no DOI or stable download URL.
 Obtain the authorized artifact from the authors, place it at

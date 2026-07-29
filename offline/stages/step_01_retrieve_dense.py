@@ -177,7 +177,8 @@ class QwenEmbeddingEncoder:
             local_files_only=local_files_only,
             low_cpu_mem_usage=True,
             attn_implementation="sdpa",
-        ).to(device)
+            device_map={"": device},
+        )
         self._model.eval()
         self.dimensions = int(self._model.config.hidden_size)
 

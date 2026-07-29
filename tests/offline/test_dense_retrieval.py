@@ -2,12 +2,19 @@
 
 from __future__ import annotations
 
+import sys
 import unittest
 from collections.abc import Sequence
+from types import ModuleType, SimpleNamespace
 from typing import Any
+from unittest.mock import Mock, patch
 
 from bettercallagent.retrieval.query_views import QueryViews
-from offline.stages.step_01_retrieve_dense import FIELDS, _encode_query_views
+from offline.stages.step_01_retrieve_dense import (
+    FIELDS,
+    QwenEmbeddingEncoder,
+    _encode_query_views,
+)
 
 
 class _RecordingEncoder:
@@ -108,6 +115,51 @@ class DenseEncoderLifecycleTests(unittest.TestCase):
             )
 
         self.assertEqual(events, [("close", 0, None)])
+
+    def test_loads_model_directly_on_configured_device(self) -> None:
+        fake_torch = ModuleType("torch")
+        fake_torch.float16 = object()
+        fake_torch.float32 = object()
+
+        tokenizer = object()
+        tokenizer_loader = SimpleNamespace(from_pretrained=Mock(return_value=tokenizer))
+        model = SimpleNamespace(
+            config=SimpleNamespace(hidden_size=4_096),
+            eval=Mock(),
+        )
+        model_loader = SimpleNamespace(from_pretrained=Mock(return_value=model))
+        fake_transformers = ModuleType("transformers")
+        fake_transformers.AutoModel = model_loader
+        fake_transformers.AutoTokenizer = tokenizer_loader
+
+        with patch.dict(
+            sys.modules,
+            {
+                "torch": fake_torch,
+                "transformers": fake_transformers,
+            },
+        ):
+            encoder = QwenEmbeddingEncoder(
+                model="Qwen/example",
+                revision="immutable-revision",
+                device="cuda:0",
+                batch_size=16,
+                max_length=1_024,
+                local_files_only=True,
+            )
+
+        model_loader.from_pretrained.assert_called_once_with(
+            "Qwen/example",
+            revision="immutable-revision",
+            dtype=fake_torch.float16,
+            local_files_only=True,
+            low_cpu_mem_usage=True,
+            attn_implementation="sdpa",
+            device_map={"": "cuda:0"},
+        )
+        self.assertEqual(encoder.dimensions, 4_096)
+        model.eval.assert_called_once_with()
+        encoder.close()
 
 
 if __name__ == "__main__":

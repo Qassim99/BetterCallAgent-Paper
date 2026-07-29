@@ -619,6 +619,7 @@ async def run_pipeline(
                 "weights": weights,
                 "attention_implementation": "sdpa",
                 "encoder_lifecycle": ("fresh_per_field" if mode == "full" else "saved_rankings"),
+                "model_placement": "single_device_map" if mode == "full" else "saved_rankings",
             },
             "reranking": {
                 "model": reranker_model,
@@ -653,6 +654,7 @@ async def run_pipeline(
             "index_model_binding": (index_manifest.model_binding if mode == "full" else "fixture"),
             "attention_implementation": "sdpa",
             "encoder_lifecycle": "fresh_per_field" if mode == "full" else "saved_rankings",
+            "model_placement": "single_device_map" if mode == "full" else "saved_rankings",
             "pooling": "last_token",
             "normalization": "l2",
             "matrix_dtype": "float16",
