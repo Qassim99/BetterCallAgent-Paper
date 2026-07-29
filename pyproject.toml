@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bettercallagent"
+version = "0.1.0"
+description = "Reproducible Swiss legal citation retrieval and evidence-gated RAG"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "BetterCallAgent Team" }]
+keywords = [
+  "legal information retrieval",
+  "retrieval-augmented generation",
+  "Swiss law",
+  "citation prediction",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "fastapi>=0.115,<1",
+  "pydantic>=2.8,<3",
+]
+
+[project.optional-dependencies]
+online = [
+  "uvicorn[standard]>=0.30,<1",
+]
+offline-gpu = [
+  "accelerate>=1,<2",
+  "numpy>=1.26,<3",
+  "pyarrow>=17,<24",
+  "torch>=2.4,<3",
+  "transformers>=4.51,<6",
+]
+dev = [
+  "build>=1.2,<2",
+  "httpx>=0.27,<1",
+  "pytest>=8.3,<9",
+  "ruff>=0.8,<1",
+  "uvicorn[standard]>=0.30,<1",
+]
+
+[project.scripts]
+bca-offline = "offline.run:main"
+bca-interpret = "interpretability.cli:main"
+
+[tool.setuptools]
+# Ship only the resource globs declared below; do not infer packages from data folders.
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["src", "."]
+include = [
+  "bettercallagent*",
+  "experiments*",
+  "interpretability*",
+  "offline*",
+  "online*",
+]
+exclude = ["tests*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+interpretability = ["examples/*.jsonl"]
+offline = [
+  "fixtures/*.csv",
+  "fixtures/*.jsonl",
+  "fixtures/*.toml",
+  "fixtures/sparse_traces/*/*.json",
+]
+online = ["fixtures/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = [
+  "frontend",
+  "runs",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+  "E501",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

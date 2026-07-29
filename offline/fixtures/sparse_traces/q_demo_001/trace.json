@@ -1,0 +1,11 @@
+{
+  "query_id": "q_demo_001",
+  "candidate_law_hits": [
+    {"citation": "Art. 41 Abs. 1 OR", "source": "synthetic-law", "score": 8.0},
+    {"citation": "Art. 97 Abs. 1 OR", "source": "synthetic-law", "score": 2.0}
+  ],
+  "candidate_court_hits": [
+    {"citation": "BGE 145 III 1", "source": "synthetic-court", "score": 7.5},
+    {"citation": "BGE 145 III 1", "source": "synthetic-court", "score": 7.0}
+  ]
+}

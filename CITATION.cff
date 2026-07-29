@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "Review artifact: final author, paper, repository, and release metadata must be added before publication."
+title: "BetterCallAgent: Reproducible Swiss Legal Citation Retrieval"
+type: software
+version: 0.1.0
+abstract: >-
+  Source release for a Swiss legal citation-retrieval pipeline, online
+  demonstration, and deterministic interpretability analyses. External paper
+  artifacts are identified by checksums but do not yet have a DOI or stable URL.
+authors:
+  - name: "BetterCallAgent Team"
+keywords:
+  - legal information retrieval
+  - retrieval-augmented generation
+  - Swiss law
+  - citation prediction

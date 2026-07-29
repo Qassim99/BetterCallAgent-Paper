@@ -1,0 +1,135 @@
+schema_version = 1
+artifact_set = "bettercallagent-validation-2026-07"
+notes = """
+Checksums describe the authors' ten-query validation snapshot. The files are not
+redistributed here. Obtain competition data under the Kaggle competition terms and
+obtain derived artifacts from the paper authors through an authorized channel.
+The artifact set currently has no DOI or stable URL. The strict offline runner can
+produce a new complete experiment but cannot recreate the missing historical batch.
+"""
+
+[[artifact]]
+id = "validation_queries"
+path = "eval/val.csv"
+size_bytes = 19775
+sha256 = "41862ef772801995cae80cf5ea947b08e197603aa37ef93aefb632e0d9de5f7f"
+provenance = "Kaggle competition: LLM Agentic Legal Information Retrieval"
+redistribution = "Not included; competition terms apply."
+
+[[artifact]]
+id = "test_queries"
+path = "eval/test.csv"
+size_bytes = 56724
+sha256 = "950ad0cb680cb2988b954f2f64e132bd3d9ae117d58b45fd2a3a5130c2856fa8"
+provenance = "Kaggle competition: LLM Agentic Legal Information Retrieval"
+redistribution = "Not included; competition terms apply."
+
+[[artifact]]
+id = "law_vocabulary"
+path = "eval/laws_de.csv"
+size_bytes = 72970627
+sha256 = "6602c06fbfe83ee9942f05083402fe5265e43df7be6b48748c7be4f52650609e"
+provenance = "Kaggle competition closed citation vocabulary"
+redistribution = "Not included; competition terms apply."
+
+[[artifact]]
+id = "court_vocabulary"
+path = "eval/court_considerations.csv.gz"
+size_bytes = 935192105
+sha256 = "a5adb6ceea4bb057b816800460bcb5b6fded7beb5c4e9e29e3dee5a777077017"
+provenance = "Kaggle competition closed citation vocabulary"
+redistribution = "Not included; competition terms apply."
+
+[[artifact]]
+id = "validation_dense_candidates"
+path = "derived/val_candidates_weighted_top1000.jsonl"
+size_bytes = 7044501
+sha256 = "8c4d5c617fd9c1f04981db5a4765d254a0b0055b759fd432d705e4f1cd6be5b8"
+provenance = "Five-view Qwen3-Embedding-8B retrieval with weighted RRF"
+redistribution = "Derived artifact; request from authors or regenerate."
+
+[[artifact]]
+id = "validation_dense_summary"
+path = "derived/val_candidates_weighted_top1000_summary.json"
+size_bytes = 801061
+sha256 = "3141e4c7ae22fde37a03779dabe59b6071a415eb9e973164af5184344a28be69"
+provenance = "Summary accompanying validation_dense_candidates"
+redistribution = "Derived artifact; request from authors or regenerate."
+
+[[artifact]]
+id = "qwen3_embedding_index"
+path = "index/qwen3_embedding_8b"
+kind = "tree"
+file_count = 8
+size_bytes = 40519716885
+sha256 = "e5b12c92060fc44e9ee04b57e683fb753d842d146f3a768b0cad8265e6131a23"
+provenance = "Five normalized float16 field matrices for 978,787 Swiss case-law rows"
+redistribution = "Large derived artifact; planned for an external paper artifact archive."
+
+[[artifact]]
+id = "swiss_caselaw_snapshot"
+path = "corpus"
+kind = "tree"
+file_count = 111
+size_bytes = 7053566993
+sha256 = "c86df340ff64347517a8385994f8e92315745ef482300246fa501f5c37d90abd"
+provenance = "111 Parquet files from the voilaj/swiss-caselaw snapshot used to build the index"
+redistribution = "CC0 source dataset; use the tree checksum because the upstream dataset is updated."
+
+[[artifact]]
+id = "validation_rerank_scores"
+path = "derived/val_qwen_top10_rerank_results.jsonl"
+size_bytes = 216444
+sha256 = "aac9b173d6cb6241b0cd1dd22e0409a5470f1b6a5ddf7575eff926e83c42859c"
+provenance = "Historical Qwen reranker output: 19/20 batches; val_002 ranks 6-10 are absent"
+redistribution = "Derived artifact; request from authors or regenerate."
+
+[[artifact]]
+id = "validation_reranker_input"
+path = "derived/val_qwen_top10_fulltext.jsonl"
+size_bytes = 3414057
+sha256 = "a2624d1c15bf922a542f03e941f5e92219d75176e2e47daac7ca90d8ae5dc374"
+provenance = "Exact 100-document verifier input used by the historical validation run"
+redistribution = "Contains case-law text; request from authors pending approved redistribution."
+
+[[artifact]]
+id = "validation_fixed_vote_submission"
+path = "reference/submission_fixed_vote_rule.csv"
+size_bytes = 3699
+sha256 = "59b55df6a0036ec7af17dbbee47bf030acbb27614d39f031871d89a8a74ac0c6"
+provenance = "Dense fixed-vote rule: vote >= 4 OR top-3 score >= 8.5"
+redistribution = "Reference output; subject to competition terms."
+
+[[artifact]]
+id = "validation_fixed_vote_bm25_submission"
+path = "reference/submission_fixed_vote_bm25_support.csv"
+size_bytes = 3817
+sha256 = "8da63361564935a48833f2968135ee9a3ebe9dcbd99e0e93dff780892317264a"
+provenance = "Fixed-vote submission plus saved SIRA/BM25 citation support"
+redistribution = "Reference output; subject to competition terms."
+
+[[artifact]]
+id = "validation_sparse_traces"
+path = "derived/sira_bm25_traces"
+kind = "tree"
+file_count = 11
+size_bytes = 6843844
+sha256 = "a80e96e9ff4d8f10f4d33ec07502de72fbdd54456f08deb40eea3c881aa26ae6"
+provenance = "Saved balanced sparse evidence traces used by the support rule"
+redistribution = "Contains derived competition-corpus excerpts; request from authors pending an approved archive."
+
+[[artifact]]
+id = "validation_support_metrics"
+path = "reference/metrics_fixed_vote_bm25_support.json"
+size_bytes = 2635
+sha256 = "58c290c36a6c87b328efa86b2b3bb1fe74f175d2aca4ffd14a628211e778c401"
+provenance = "Metrics emitted with the ten-query fixed-vote plus support run"
+redistribution = "Small derived output; planned for the approved paper artifact archive."
+
+[[artifact]]
+id = "validation_support_audit"
+path = "reference/audit_fixed_vote_bm25_support.json"
+size_bytes = 19242
+sha256 = "fbe3d9045622e388a2e35325b436034219034d3b6c91bb09b69ab54769d51049"
+provenance = "Per-query audit emitted with the ten-query fixed-vote plus support run"
+redistribution = "Derived output; planned for the approved paper artifact archive."
