@@ -12,6 +12,13 @@ Behavior was retained only after comparing source, saved outputs, and documentat
 Direct differential checks found:
 
 - zero differences across all ten saved five-view query transformations; and
+- byte-identical ordering, scores, and metadata across all 10,000 dense candidates
+  after preserving every non-blank query-view string exactly before tokenization
+  (artifact SHA-256
+  `8c4d5c617fd9c1f04981db5a4765d254a0b0055b759fd432d705e4f1cd6be5b8`); and
+- byte-identical query embeddings in controlled comparisons of fresh-per-view versus
+  shared encoders, `dtype` versus `torch_dtype`, and direct device-map versus
+  host-then-device loading; and
 - zero citation-extraction differences across 3,577 occurrences in the first 100
   audited reranker documents.
 

@@ -616,6 +616,15 @@ async def run_pipeline(
                 "rrf_k": retrieval_rrf_k,
                 "weights": weights,
                 "attention_implementation": "sdpa",
+                "encoder_lifecycle": (
+                    "shared_across_fields" if mode == "full" else "saved_rankings"
+                ),
+                "model_placement": "single_device_map" if mode == "full" else "saved_rankings",
+                "query_text_preparation": (
+                    "preserve_nonblank_whitespace_blank_to_single_space"
+                    if mode == "full"
+                    else "saved_rankings"
+                ),
             },
             "reranking": {
                 "model": reranker_model,
@@ -649,6 +658,13 @@ async def run_pipeline(
             "embedding_revision": retrieval_revision,
             "index_model_binding": (index_manifest.model_binding if mode == "full" else "fixture"),
             "attention_implementation": "sdpa",
+            "encoder_lifecycle": "shared_across_fields" if mode == "full" else "saved_rankings",
+            "model_placement": "single_device_map" if mode == "full" else "saved_rankings",
+            "query_text_preparation": (
+                "preserve_nonblank_whitespace_blank_to_single_space"
+                if mode == "full"
+                else "saved_rankings"
+            ),
             "pooling": "last_token",
             "normalization": "l2",
             "matrix_dtype": "float16",

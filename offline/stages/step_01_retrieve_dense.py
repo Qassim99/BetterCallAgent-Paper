@@ -129,9 +129,22 @@ class TextEncoder(Protocol):
     def encode(self, texts: Sequence[str]) -> Any:
         """Return an L2-normalized float32 matrix in input order."""
 
+    def close(self) -> None:
+        """Release model resources after query encoding."""
+
+
+def _prepare_encoder_texts(texts: Sequence[str]) -> list[str]:
+    """Preserve non-blank query text exactly and replace blank values.
+
+    Whitespace is tokenizer input and therefore part of the versioned experiment.
+    The historical pipeline retained it for every non-blank query view.
+    """
+
+    return [text if text.strip() else " " for text in texts]
+
 
 class QwenEmbeddingEncoder:
-    """Lazy Qwen encoder used only by explicit full-reproduction runs."""
+    """Pinned Qwen encoder used by explicit full-reproduction runs."""
 
     def __init__(
         self,
@@ -169,11 +182,12 @@ class QwenEmbeddingEncoder:
         self._model = AutoModel.from_pretrained(
             model,
             revision=revision,
-            torch_dtype=dtype,
+            dtype=dtype,
             local_files_only=local_files_only,
             low_cpu_mem_usage=True,
+            device_map={"": device},
             attn_implementation="sdpa",
-        ).to(device)
+        )
         self._model.eval()
         self.dimensions = int(self._model.config.hidden_size)
 
@@ -186,7 +200,7 @@ class QwenEmbeddingEncoder:
         batches: list[Any] = []
         with torch.inference_mode():
             for start in range(0, len(texts), self._batch_size):
-                values = [text.strip() or " " for text in texts[start : start + self._batch_size]]
+                values = _prepare_encoder_texts(texts[start : start + self._batch_size])
                 inputs = self._tokenizer(
                     values,
                     padding=True,
@@ -387,6 +401,24 @@ def _serialize_query(
     return candidates, summary
 
 
+def _encode_query_views(
+    *,
+    views: Sequence[QueryViews],
+    encoder: TextEncoder,
+    expected_dimensions: int,
+) -> dict[str, Any]:
+    """Encode all retrieval views with one model and always release it."""
+
+    try:
+        if encoder.dimensions != expected_dimensions:
+            raise ValueError(
+                f"Encoder dimension {encoder.dimensions} != index dimension {expected_dimensions}."
+            )
+        return {field: encoder.encode([getattr(view, field) for view in views]) for field in FIELDS}
+    finally:
+        encoder.close()
+
+
 def retrieve_from_index(
     *,
     queries_path: Path,
@@ -408,20 +440,14 @@ def retrieve_from_index(
         expected_model=model,
         expected_revision=model_revision,
     )
-    if encoder.dimensions != manifest.dimensions:
-        raise ValueError(
-            f"Encoder dimension {encoder.dimensions} != index dimension {manifest.dimensions}."
-        )
     query_rows = load_queries(queries_path)
     query_ids = list(query_rows)
     views = [build_query_views(str(query_rows[query_id]["query"])) for query_id in query_ids]
-    query_matrices = {
-        field: encoder.encode([getattr(query_view, field) for query_view in views])
-        for field in FIELDS
-    }
-    close_encoder = getattr(encoder, "close", None)
-    if callable(close_encoder):
-        close_encoder()
+    query_matrices = _encode_query_views(
+        views=views,
+        encoder=encoder,
+        expected_dimensions=manifest.dimensions,
+    )
 
     per_field: dict[str, list[list[tuple[float, int]]]] = {}
     for field in FIELDS:

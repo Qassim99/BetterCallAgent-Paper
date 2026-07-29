@@ -58,6 +58,8 @@ The full runner:
 - records SHA-256 values for file and directory inputs;
 - records the resolved non-secret configuration, command, seed, platform, dependency
   versions, Git state, and per-stage status;
+- records the dense text-preparation, shared-model lifecycle, and single-device
+  placement settings;
 - binds replay scores to query, candidate, rank, prompt, batch, model, and input
   fingerprints;
 - requires complete candidate-score joins; and
