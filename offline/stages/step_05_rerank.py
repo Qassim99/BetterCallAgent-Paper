@@ -11,6 +11,7 @@ import argparse
 import asyncio
 import hashlib
 import json
+import math
 import os
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
@@ -160,17 +161,21 @@ def batch_fingerprint(
     max_tokens: int = 4_096,
     json_response: bool = True,
     temperature: float = 0.0,
+    chat_template_kwargs: Mapping[str, Any] | None = None,
 ) -> str:
     """Bind a replay to the exact prompt and ordered batch composition."""
 
+    generation: JsonObject = {
+        "json_response": json_response,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+    }
+    if chat_template_kwargs is not None:
+        generation["chat_template_kwargs"] = dict(chat_template_kwargs)
     payload = {
         "prompt_version": PROMPT_VERSION,
         "model": model,
-        "generation": {
-            "json_response": json_response,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-        },
+        "generation": generation,
         "system_prompt": SYSTEM_PROMPT,
         "user_prompt": _prompt_for_batch(
             rows,
@@ -205,6 +210,16 @@ def _make_batches(
     return batches
 
 
+def prepare_batches(
+    rows: Sequence[JsonObject],
+    *,
+    batch_size: int = 5,
+) -> list[list[JsonObject]]:
+    """Validate inputs and return the exact batches consumed by Stage 5."""
+
+    return _make_batches(_validate_inputs(rows), batch_size=batch_size)
+
+
 def _parse_scores(
     content: str,
     *,
@@ -219,10 +234,20 @@ def _parse_scores(
         if not isinstance(item, dict):
             raise ValueError("Every verifier score must be an object.")
         identifier = str(item.get("candidate_id") or "")
+        if not identifier:
+            raise ValueError("Verifier returned an empty candidate_id.")
         if identifier in parsed:
             raise ValueError(f"Verifier returned duplicate candidate_id {identifier!r}.")
-        score = float(item["score"])
-        confidence = float(item["confidence"])
+        raw_score = item.get("score")
+        raw_confidence = item.get("confidence")
+        if isinstance(raw_score, bool) or not isinstance(raw_score, (int, float)):
+            raise ValueError(f"{identifier}: score must be a JSON number.")
+        if isinstance(raw_confidence, bool) or not isinstance(raw_confidence, (int, float)):
+            raise ValueError(f"{identifier}: confidence must be a JSON number.")
+        score = float(raw_score)
+        confidence = float(raw_confidence)
+        if not math.isfinite(score) or not math.isfinite(confidence):
+            raise ValueError(f"{identifier}: score and confidence must be finite.")
         rationale = normalize_text(item.get("rationale") or item.get("rationale_de"))
         if not 0.0 <= score <= 10.0:
             raise ValueError(f"{identifier}: score must be in [0, 10].")
@@ -347,6 +372,7 @@ async def rerank_live(
     max_tokens: int = 4_096,
     json_response: bool = True,
     temperature: float = 0.0,
+    chat_template_kwargs: Mapping[str, Any] | None = None,
 ) -> list[JsonObject]:
     """Score batches with bounded retries and an atomically durable checkpoint."""
 
@@ -366,6 +392,7 @@ async def rerank_live(
             max_tokens=max_tokens,
             json_response=json_response,
             temperature=temperature,
+            chat_template_kwargs=chat_template_kwargs,
         ): batch
         for batch in batches
     }
@@ -394,6 +421,7 @@ async def rerank_live(
                 normalized_content,
                 expected_ids=identifiers,
             )
+            record.pop("raw_response", None)
             checkpoint_records[fingerprint] = record
 
     batch_order = list(expected_batches)
@@ -409,6 +437,9 @@ async def rerank_live(
                 if fingerprint in checkpoint_records
             ),
         )
+
+    if checkpoint_records:
+        write_checkpoint()
 
     async def score_batch(fingerprint: str, batch: list[JsonObject]) -> None:
         if fingerprint in batch_scores:
@@ -460,11 +491,19 @@ async def rerank_live(
                         "json_response": json_response,
                         "max_tokens": max_tokens,
                         "temperature": temperature,
+                        "chat_template_kwargs": dict(chat_template_kwargs or {}),
                     },
-                    "usage_total_tokens": response.usage_total_tokens,
+                    "usage": {
+                        "prompt_tokens": response.usage_prompt_tokens,
+                        "completion_tokens": response.usage_completion_tokens,
+                        "reasoning_tokens": response.usage_reasoning_tokens,
+                        "total_tokens": response.usage_total_tokens,
+                    },
+                    "latency_seconds": response.latency_seconds,
                     "attempts": attempt,
+                    "final_content": response.content,
+                    "reasoning_content": response.reasoning_content,
                     "normalized_content": response.content,
-                    "raw_response": (dict(response.raw) if response.raw is not None else None),
                 }
                 async with checkpoint_lock:
                     batch_scores[fingerprint] = parsed
@@ -550,6 +589,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=0,
         help="Optional verifier-only truncation; 0 preserves full text.",
     )
+    parser.add_argument(
+        "--enable-thinking",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Forward chat_template_kwargs.enable_thinking when the provider supports it.",
+    )
     return parser
 
 
@@ -573,6 +618,9 @@ async def _run(args: argparse.Namespace) -> list[JsonObject]:
         base_url=args.base_url,
         api_key=api_key,
         timeout_seconds=args.timeout,
+        chat_template_kwargs=(
+            {"enable_thinking": args.enable_thinking} if args.enable_thinking is not None else None
+        ),
     )
     try:
         checkpoint = args.checkpoint or args.output.with_name(f"{args.output.stem}.batches.jsonl")
@@ -587,6 +635,11 @@ async def _run(args: argparse.Namespace) -> list[JsonObject]:
             max_attempts=args.max_attempts,
             retry_delay_seconds=args.retry_delay_seconds,
             max_tokens=args.max_tokens,
+            chat_template_kwargs=(
+                {"enable_thinking": args.enable_thinking}
+                if args.enable_thinking is not None
+                else None
+            ),
         )
     finally:
         await provider.close()

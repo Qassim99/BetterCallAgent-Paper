@@ -22,7 +22,7 @@ from offline.io import read_jsonl
 from offline.run import REPOSITORY_ROOT, run_pipeline
 from offline.stages.step_01_retrieve_dense import FIELDS, _serialize_query
 from offline.stages.step_02_retrieve_sparse_support import balanced_hits
-from offline.stages.step_05_rerank import rerank_from_replay, rerank_live
+from offline.stages.step_05_rerank import _parse_scores, rerank_from_replay, rerank_live
 from offline.stages.step_06_select_citations import select_for_queries
 
 FIXTURES = REPOSITORY_ROOT / "offline" / "fixtures"
@@ -229,6 +229,32 @@ class OfflinePipelineTests(unittest.TestCase):
         )
         self.assertEqual(predictions["q"], ("Art. 41 OR",))
 
+    def test_verifier_scores_require_finite_json_numbers(self) -> None:
+        invalid_values = (
+            ("9.0", 0.9, "score must be a JSON number"),
+            (True, 0.9, "score must be a JSON number"),
+            (9.0, "0.9", "confidence must be a JSON number"),
+            (9.0, False, "confidence must be a JSON number"),
+            (float("nan"), 0.9, "score and confidence must be finite"),
+            (9.0, float("inf"), "score and confidence must be finite"),
+        )
+        for score, confidence, expected_error in invalid_values:
+            with self.subTest(score=score, confidence=confidence):
+                content = json.dumps(
+                    {
+                        "scores": [
+                            {
+                                "candidate_id": "q::gi7",
+                                "score": score,
+                                "confidence": confidence,
+                                "rationale_de": "match",
+                            }
+                        ]
+                    }
+                )
+                with self.assertRaisesRegex(ValueError, expected_error):
+                    _parse_scores(content, expected_ids=["q::gi7"])
+
     def test_live_reranker_retries_and_resumes_from_raw_checkpoint(self) -> None:
         row = {
             "query_id": "q",
@@ -267,7 +293,16 @@ class OfflinePipelineTests(unittest.TestCase):
                     content=content,
                     model="provider-resolved-model",
                     usage_total_tokens=17,
-                    raw={"model": "provider-resolved-model", "content": content},
+                    usage_prompt_tokens=11,
+                    usage_completion_tokens=6,
+                    usage_reasoning_tokens=4,
+                    latency_seconds=0.25,
+                    reasoning_content="private reasoning trace",
+                    raw={
+                        "model": "provider-resolved-model",
+                        "content": content,
+                        "authorization": "Bearer must-never-be-persisted",
+                    },
                 )
 
             async def close(self) -> None:
@@ -287,16 +322,40 @@ class OfflinePipelineTests(unittest.TestCase):
                     checkpoint_path=checkpoint,
                     max_attempts=2,
                     retry_delay_seconds=0,
+                    chat_template_kwargs={"enable_thinking": True},
                 )
             )
             self.assertEqual(provider.calls, 2)
             checkpoint_rows = list(read_jsonl(checkpoint))
-            self.assertEqual(checkpoint_rows[0]["attempts"], 2)
+            record = checkpoint_rows[0]
+            self.assertEqual(record["attempts"], 2)
             self.assertEqual(
-                checkpoint_rows[0]["provider_model"],
+                record["provider_model"],
                 "provider-resolved-model",
             )
-            self.assertIn("raw_response", checkpoint_rows[0])
+            self.assertEqual(
+                record["generation"],
+                {
+                    "json_response": True,
+                    "max_tokens": 4_096,
+                    "temperature": 0.0,
+                    "chat_template_kwargs": {"enable_thinking": True},
+                },
+            )
+            self.assertEqual(
+                record["usage"],
+                {
+                    "prompt_tokens": 11,
+                    "completion_tokens": 6,
+                    "reasoning_tokens": 4,
+                    "total_tokens": 17,
+                },
+            )
+            self.assertEqual(record["latency_seconds"], 0.25)
+            self.assertEqual(record["final_content"], record["normalized_content"])
+            self.assertEqual(record["reasoning_content"], "private reasoning trace")
+            self.assertNotIn("raw_response", record)
+            self.assertNotIn("must-never-be-persisted", checkpoint.read_text(encoding="utf-8"))
 
             resumed_provider = FlakyProvider()
             resumed_provider.calls = 1
@@ -311,6 +370,7 @@ class OfflinePipelineTests(unittest.TestCase):
                     checkpoint_path=checkpoint,
                     max_attempts=2,
                     retry_delay_seconds=0,
+                    chat_template_kwargs={"enable_thinking": True},
                 )
             )
             self.assertEqual(resumed_provider.calls, 1)

@@ -85,10 +85,8 @@ authentication is required, set `BCA_AUTH_TOKEN` to a random token of at least
 
 Recommended new-experiment candidates are DeepSeek V4 Flash (official local ID
 `deepseek-ai/DeepSeek-V4-Flash`, provider example
-a provider example, and no generally downloadable checkpoint was recorded as of
-2026-07-29. Use the exact identifier advertised by your endpoint in
-`BCA_ALLOWED_MODELS`. None of these alternatives produced the historical reported
-values.
+`deepseek/deepseek-v4-flash`) and `Qwen/Qwen3.6-27B`. None of these alternatives
+produced the historical reported values.
 
 ## API contract
 
