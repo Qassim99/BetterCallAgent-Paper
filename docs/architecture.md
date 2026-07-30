@@ -7,6 +7,8 @@ BetterCallAgent contains two related but separate workflows. Shared primitives l
 
 ```mermaid
 flowchart LR
+    P["Case-law Parquet + document views"] --> I0["Stage 0: build dense index"]
+    I0 --> C
     A["Question"] --> B["Five query views"]
     B --> C["Qwen dense retrieval"]
     C --> D["Weighted reciprocal-rank fusion"]
@@ -20,8 +22,9 @@ flowchart LR
     K --> L["Submission and offline Macro-F1"]
 ```
 
-The seven numbered modules in `offline/stages` expose each transformation as a small,
-testable Python stage. `offline.run` handles configuration, integrity checks,
+Stage 0 builds the versioned retrieval index. The seven experiment modules then
+expose each transformation as a small, testable Python stage. `offline.run` handles
+configuration, integrity checks,
 stage ordering, and run provenance.
 
 The support method does not replace dense candidates with sparse documents. It adds a

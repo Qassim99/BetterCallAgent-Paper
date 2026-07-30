@@ -36,8 +36,9 @@ the dataset name.
 
 The dense index, dense candidates, complete reranker input, incomplete historical
 scores, balanced sparse traces, reference submissions, and audits are separate
-hash-bound artifacts. No dense-index builder or sparse-evidence generator is included
-in this release.
+hash-bound artifacts. A dense-index builder is included in
+`offline/stages/step_00_build_dense_index.py`; no sparse-evidence generator is
+included in this release.
 
 The authors' external artifact set currently has no DOI or stable download URL. This
 release provides source and a checksum manifest; full reproduction is blocked until
