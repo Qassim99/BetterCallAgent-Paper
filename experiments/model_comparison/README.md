@@ -133,6 +133,10 @@ scores in `[0, 10]`, numeric confidence values in `[0, 1]`, and a non-empty Germ
 rationale. A partial run is never evaluated. A complete evaluation requires all 100
 scores.
 
+Prompt v3 repeats the ordered list of five expected candidate IDs at the end of every
+batch and forbids missing, invented, or duplicate IDs. This contract is part of the
+prompt and batch fingerprints; earlier checkpoints cannot be mixed with it.
+
 `reasoning_content` is never treated as the model's final answer. If a provider emits
 a leading `<think>...</think>` block, it is stored separately and only the non-empty
 suffix is parsed. Reasoning-only, malformed, or token-truncated replies are rejected
