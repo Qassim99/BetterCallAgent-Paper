@@ -31,7 +31,8 @@ The authors' artifact set currently has **no DOI or stable URL**. This release
 therefore provides source and a checksum manifest; full reproduction is blocked until
 the authors publish an authorized archive. In particular:
 
-- no dense-index builder is included;
+- a Stage 0 builder can produce a new dense index, while the generated document-view
+  snapshot required for byte-identical historical rebuilding was not versioned;
 - the historical verifier file intentionally has only 19 of 20 batches and 95 of 100
   scores;
 - the exact index is bound by its tree hash and the hashed model configuration because

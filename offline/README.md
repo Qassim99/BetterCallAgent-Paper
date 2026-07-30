@@ -1,11 +1,13 @@
 # Offline paper pipeline
 
-This folder contains the seven-stage citation-prediction experiment. It is separate
-from the interactive online application and is the only pipeline that reads gold
+This folder contains the Stage 0 dense-index builder and the seven-stage
+citation-prediction experiment. It is separate from the interactive online
+application and is the only pipeline that reads gold
 labels for evaluation.
 
 | Stage | File | Purpose |
 |---|---|---|
+| 0 | `stages/step_00_build_dense_index.py` | Validate Parquet/document-view inputs and build five normalized, provenance-bound embedding matrices |
 | 1 | `stages/step_01_retrieve_dense.py` | Build five exact query views, retrieve from five normalized Qwen matrices, and apply weighted reciprocal-rank fusion |
 | 2 | `stages/step_02_retrieve_sparse_support.py` | Aggregate citation counts from saved balanced sparse evidence |
 | 3 | `stages/step_03_materialize_documents.py` | Join candidates to full documents in the case-law Parquet snapshot |
@@ -59,8 +61,9 @@ text-preparation contract, the `shared_across_fields` lifecycle, and direct
 single-device placement. Controlled A/B runs found the alternative lifecycle, dtype
 keyword, and placement paths byte-identical.
 
-The exact dense index is an external, hash-verified input. No index builder is
-included in this release; see [indexing/README.md](indexing/README.md).
+The exact historical dense index is an external, hash-verified input. Stage 0 can
+build a new provenance-bound index from Parquet and document-view inputs; see
+[indexing/README.md](indexing/README.md).
 
 ## Historical result versus a new run
 

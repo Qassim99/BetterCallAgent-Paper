@@ -90,7 +90,7 @@ From the repository root:
 
 ```bash
 python3 -m pip install --user uv
-uv sync --locked --extra dev --extra online
+uv sync --locked --extra dev --extra online --extra offline-index
 npm --prefix frontend ci
 ```
 
@@ -225,8 +225,10 @@ tokenization and maps only blank values to one space. It uses one pinned Qwen en
 for all five views and records the text-preparation, lifecycle, and placement
 settings. Its output is a fresh result.
 
-The exact historical dense index is approximately 40.5 GB. No index builder is
-included in this release. The audited index manifest did not record the embedding
+The exact historical dense index is approximately 40.5 GB. A clean, resumable
+builder is now available as `bca-build-index`; see
+[offline/indexing/README.md](offline/indexing/README.md). The audited predecessor
+index manifest did not record the embedding
 model or revision, so the release binds the index with both its complete tree hash
 and the hashed full-run configuration, which pins
 `Qwen/Qwen3-Embedding-8B@1d8ad4ca9b3dd8059ad90a75d4983776a23d44af`.

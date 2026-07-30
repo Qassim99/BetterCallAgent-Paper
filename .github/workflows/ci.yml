@@ -29,7 +29,9 @@ jobs:
         with:
           version: "0.12.0"
           enable-cache: true
-      - run: uv sync --locked --extra dev --extra online --python "${{ matrix.python-version }}"
+      - run: >-
+          uv sync --locked --extra dev --extra online --extra offline-index
+          --python "${{ matrix.python-version }}"
       - run: uv run --locked ruff check .
       - run: uv run --locked ruff format --check .
       - run: PYTHONDONTWRITEBYTECODE=1 uv run --locked pytest
