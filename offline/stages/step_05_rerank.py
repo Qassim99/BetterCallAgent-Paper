@@ -28,7 +28,7 @@ from bettercallagent.schemas import ChatMessage
 from offline.identity import candidate_id
 from offline.io import JsonObject, atomic_write_jsonl, normalize_text, read_jsonl
 
-PROMPT_VERSION = "swiss-origin-verifier-de-v2"
+PROMPT_VERSION = "swiss-origin-verifier-de-v3-exact-ids"
 SYSTEM_PROMPT = """Du bist ein juristischer Retrieval-Reranker fuer Schweizer Gerichtsentscheide.
 
 Ziel: Finde zu einer Kaggle-Query das urspruengliche Gerichtsdokument. Die Query wurde oft aus dem Originalfall erzeugt, aber stark anonymisiert/paraphrasiert:
@@ -149,7 +149,12 @@ def _prompt_for_batch(rows: Sequence[JsonObject], *, document_char_limit: int) -
             f"embedding_hits: {json.dumps(row.get('hits') or [], ensure_ascii=False)}\n"
             f"document:\n{text}"
         )
-    parts.append("\nGib exakt JSON mit einem Score fuer jeden candidate_id zurueck.")
+    expected_ids = [candidate_id(row) for row in rows]
+    parts.append(
+        "\nGib exakt JSON mit genau einem Score fuer jede erwartete candidate_id "
+        "zurueck. Keine ID auslassen, erfinden oder duplizieren.\n"
+        f"Erwartete candidate_ids: {json.dumps(expected_ids, ensure_ascii=False)}"
+    )
     return "\n".join(parts)
 
 

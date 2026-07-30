@@ -22,7 +22,12 @@ from offline.io import read_jsonl
 from offline.run import REPOSITORY_ROOT, run_pipeline
 from offline.stages.step_01_retrieve_dense import FIELDS, _serialize_query
 from offline.stages.step_02_retrieve_sparse_support import balanced_hits
-from offline.stages.step_05_rerank import _parse_scores, rerank_from_replay, rerank_live
+from offline.stages.step_05_rerank import (
+    _parse_scores,
+    _prompt_for_batch,
+    rerank_from_replay,
+    rerank_live,
+)
 from offline.stages.step_06_select_citations import select_for_queries
 
 FIXTURES = REPOSITORY_ROOT / "offline" / "fixtures"
@@ -254,6 +259,28 @@ class OfflinePipelineTests(unittest.TestCase):
                 )
                 with self.assertRaisesRegex(ValueError, expected_error):
                     _parse_scores(content, expected_ids=["q::gi7"])
+
+    def test_verifier_prompt_repeats_exact_expected_ids_at_the_end(self) -> None:
+        rows = [
+            {
+                "query_id": "q",
+                "query": "question",
+                "meta_query": "meta",
+                "keywords_query": "keywords",
+                "doc_id": f"doc-{global_index}",
+                "global_idx": global_index,
+                "rank": rank,
+                "fusion_score": 1.0 / rank,
+                "hits": [],
+                "document_text": "document",
+            }
+            for rank, global_index in enumerate((7, 11), start=1)
+        ]
+
+        prompt = _prompt_for_batch(rows, document_char_limit=0)
+        expected_ids = json.loads(prompt.rsplit("Erwartete candidate_ids: ", maxsplit=1)[1])
+
+        self.assertEqual(expected_ids, ["q::gi7", "q::gi11"])
 
     def test_live_reranker_retries_and_resumes_from_raw_checkpoint(self) -> None:
         row = {
