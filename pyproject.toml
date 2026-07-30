@@ -33,12 +33,12 @@ online = [
 ]
 offline-index = [
   "numpy>=1.26,<3",
-  "pyarrow>=17,<25",
+  "pyarrow>=17,<26",
 ]
 offline-gpu = [
   "accelerate>=1,<2",
   "numpy>=1.26,<3",
-  "pyarrow>=17,<25",
+  "pyarrow>=17,<26",
   "torch>=2.4,<3",
   "transformers>=4.51,<6",
 ]
