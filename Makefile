@@ -8,7 +8,7 @@ UV ?= uv
 setup: setup-python setup-frontend
 
 setup-python:
-	$(UV) sync --locked --extra dev --extra online
+	$(UV) sync --locked --extra dev --extra online --extra offline-index
 
 setup-frontend:
 	$(NPM) --prefix frontend ci

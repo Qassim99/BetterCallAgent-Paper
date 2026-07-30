@@ -50,6 +50,7 @@ temp/
 
 # Large or generated research artifacts
 artifacts/downloads/
+artifacts/generated/
 data/raw/
 data/processed/
 data/private/

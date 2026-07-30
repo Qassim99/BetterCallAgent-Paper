@@ -17,8 +17,9 @@
 
 - The external artifact archive currently has no DOI or stable URL. Until the authors
   publish an authorized archive, this is a source-plus-manifest release.
-- No dense-index builder is included. The exact index must be obtained and verified
-  by tree hash.
+- Stage 0 can build new dense indexes. The exact historical index must still be
+  obtained and verified by tree hash because its document-view input snapshot was
+  not versioned as a release artifact.
 - The predecessor index manifest omitted embedding model and revision metadata. The
   release compensates by binding its tree hash to a hashed configuration containing
   the exact model revision.

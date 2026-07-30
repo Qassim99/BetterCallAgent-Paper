@@ -82,8 +82,9 @@ The external archive currently has no DOI or stable URL. This release therefore
 provides source and a checksum manifest; full reproduction is blocked until the
 authors publish files they are authorized to redistribute.
 
-The exact dense index is supplied as a tree artifact. No index builder is included.
-Its predecessor manifest omitted model and revision fields, so the clean release
+The exact historical dense index is supplied as a tree artifact. Stage 0 builds new
+indexes from validated Parquet and document-view inputs. Its predecessor manifest
+omitted model and revision fields, so the clean release
 binds it through:
 
 1. the complete eight-file tree hash; and

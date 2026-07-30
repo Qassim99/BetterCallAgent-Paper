@@ -4,8 +4,9 @@ Tests are organized by public component:
 
 - `online/` covers configuration, asset validation, six-stage behavior, security
   boundaries, streamed event order, and fixture execution;
-- `offline/` covers deterministic stages, replay fingerprints, strict joins, sparse
-  balancing, output isolation, and a complete synthetic run;
+- `offline/` covers document-view parsing, deterministic/resumable index construction,
+  builder-to-Stage-1 retrieval, replay fingerprints, strict joins, sparse balancing,
+  output isolation, and a complete synthetic run;
 - `interpretability/` covers formulas, conservative error attribution, deterministic
   surrogate contributions, seeded perturbations, and CLI composition; and
 - `repository/` covers the artifact manifest and release hygiene.

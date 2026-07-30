@@ -31,10 +31,14 @@ dependencies = [
 online = [
   "uvicorn[standard]>=0.30,<1",
 ]
+offline-index = [
+  "numpy>=1.26,<3",
+  "pyarrow>=17,<25",
+]
 offline-gpu = [
   "accelerate>=1,<2",
   "numpy>=1.26,<3",
-  "pyarrow>=17,<24",
+  "pyarrow>=17,<25",
   "torch>=2.4,<3",
   "transformers>=4.51,<6",
 ]
@@ -47,6 +51,7 @@ dev = [
 ]
 
 [project.scripts]
+bca-build-index = "offline.stages.step_00_build_dense_index:main"
 bca-offline = "offline.run:main"
 bca-interpret = "interpretability.cli:main"
 

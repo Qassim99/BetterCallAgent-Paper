@@ -6,7 +6,7 @@ use validation answers as online hints.
 1. Create a focused branch.
 2. Add or update tests before changing a pipeline rule.
 3. Install locked dependencies with
-   `uv sync --locked --extra dev --extra online` and
+   `uv sync --locked --extra dev --extra online --extra offline-index` and
    `npm --prefix frontend ci`.
 4. Run `make check`.
 5. Record every metric with its exact split, query count, configuration, model and
