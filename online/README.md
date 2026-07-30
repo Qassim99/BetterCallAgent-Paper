@@ -85,12 +85,15 @@ authentication is required, set `BCA_AUTH_TOKEN` to a random token of at least
 
 Recommended new-experiment candidates are DeepSeek V4 Flash (official local ID
 `deepseek-ai/DeepSeek-V4-Flash`, provider example
-`deepseek/deepseek-v4-flash`) and `Qwen/Qwen3.6-27B`. The German/English Soofi S
-model is an early-access, deployment-specific option; `Soofi-S-Instruct` is only
-a provider example, and no generally downloadable checkpoint was recorded as of
-2026-07-29. Use the exact identifier advertised by your endpoint in
-`BCA_ALLOWED_MODELS`. None of these alternatives produced the historical reported
-values.
+`deepseek/deepseek-v4-flash`) and `Qwen/Qwen3.6-27B`. None of these alternatives
+produced the historical reported values.
+
+The hosted SOOFI comparison is intentionally isolated from this generic online
+service. Its runner uses `SOOFI_*` variables and sends
+`chat_template_kwargs.enable_thinking=false`; see
+[the model-comparison guide](../experiments/model_comparison/README.md). The online
+service instead consumes the documented `BCA_*` variables and does not silently
+translate between provider profiles.
 
 ## API contract
 
