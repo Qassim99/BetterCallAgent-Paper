@@ -144,4 +144,9 @@ class LLMResponse:
     content: str
     model: str
     usage_total_tokens: int = 0
+    usage_prompt_tokens: int = 0
+    usage_completion_tokens: int = 0
+    usage_reasoning_tokens: int = 0
+    latency_seconds: float = 0.0
+    reasoning_content: str | None = None
     raw: Mapping[str, Any] | None = None

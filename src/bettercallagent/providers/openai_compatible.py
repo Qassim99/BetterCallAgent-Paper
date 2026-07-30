@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+import math
 import ssl
+import time
 import urllib.error
 import urllib.request
 from collections.abc import Mapping, Sequence
@@ -56,36 +58,91 @@ def parse_completion_envelope(
     body: str,
     *,
     requested_model: str,
+    latency_seconds: float = 0.0,
 ) -> LLMResponse:
-    """Normalize a chat-completion envelope and its explicit content fields.
+    """Normalize an OpenAI-compatible completion without promoting reasoning.
 
-    Some compatible reasoning models place their final text in
-    ``reasoning_content`` while returning an empty ``content`` field. The
-    fallback is restricted to those two documented fields; both-empty responses
-    still fail.
+    Reasoning models may return a separate ``reasoning_content`` field or put a
+    leading ``<think>...</think>`` block in ``content``. Reasoning is retained
+    for audit, but only the non-empty final answer is exposed as ``content``.
     """
     try:
         parsed = json.loads(body)
-        message = parsed["choices"][0]["message"]
+        choice = parsed["choices"][0]
+        message = choice["message"]
     except (json.JSONDecodeError, KeyError, IndexError, TypeError) as exc:
         raise ProviderError("Provider returned an invalid completion envelope.") from exc
     if not isinstance(message, dict):
         raise ProviderError("Provider returned an invalid completion message.")
-    content = message.get("content")
-    if not isinstance(content, str) or not content.strip():
-        content = message.get("reasoning_content")
-    if not isinstance(content, str) or not content.strip():
-        raise ProviderError("Provider returned empty completion content.")
+    if choice.get("finish_reason") == "length":
+        raise ProviderError("Provider truncated the completion at the token limit.")
+
+    raw_content = message.get("content")
+    if not isinstance(raw_content, str) or not raw_content.strip():
+        raise ProviderError("Provider returned no final completion content.")
+    content, inline_reasoning = _separate_inline_reasoning(raw_content)
+    provider_reasoning = message.get("reasoning_content")
+    if provider_reasoning is not None and not isinstance(provider_reasoning, str):
+        raise ProviderError("Provider returned invalid reasoning_content.")
+    reasoning_parts = [
+        value.strip()
+        for value in (provider_reasoning, inline_reasoning)
+        if isinstance(value, str) and value.strip()
+    ]
+    reasoning_content = "\n\n".join(reasoning_parts) or None
+
     usage = parsed.get("usage") or {}
-    total_tokens = usage.get("total_tokens", 0)
-    if not isinstance(total_tokens, int) or total_tokens < 0:
-        raise ProviderError("Provider returned an invalid token count.")
+    if not isinstance(usage, dict):
+        raise ProviderError("Provider returned invalid token usage.")
+    total_tokens = _nonnegative_token_count(usage, "total_tokens")
+    prompt_tokens = _nonnegative_token_count(usage, "prompt_tokens")
+    completion_tokens = _nonnegative_token_count(usage, "completion_tokens")
+    completion_details = usage.get("completion_tokens_details") or {}
+    if not isinstance(completion_details, dict):
+        raise ProviderError("Provider returned invalid completion token details.")
+    reasoning_tokens = _nonnegative_token_count(completion_details, "reasoning_tokens")
+    if not isinstance(latency_seconds, (int, float)) or not math.isfinite(latency_seconds):
+        raise ProviderError("Provider request latency must be finite.")
+    if latency_seconds < 0:
+        raise ProviderError("Provider request latency cannot be negative.")
     return LLMResponse(
-        content=content.strip(),
+        content=content,
         model=str(parsed.get("model") or requested_model),
         usage_total_tokens=total_tokens,
+        usage_prompt_tokens=prompt_tokens,
+        usage_completion_tokens=completion_tokens,
+        usage_reasoning_tokens=reasoning_tokens,
+        latency_seconds=float(latency_seconds),
+        reasoning_content=reasoning_content,
         raw=parsed,
     )
+
+
+def _nonnegative_token_count(container: Mapping[str, Any], field_name: str) -> int:
+    value = container.get(field_name, 0)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ProviderError(f"Provider returned invalid {field_name}.")
+    return value
+
+
+def _separate_inline_reasoning(content: str) -> tuple[str, str | None]:
+    """Return final text and an optional leading ``<think>`` trace."""
+
+    stripped = content.strip()
+    if not stripped.startswith("<think>"):
+        if "</think>" in stripped:
+            raise ProviderError("Provider returned a malformed inline reasoning block.")
+        return stripped, None
+    closing = stripped.find("</think>", len("<think>"))
+    if closing < 0:
+        raise ProviderError("Provider returned a truncated inline reasoning block.")
+    reasoning = stripped[len("<think>") : closing].strip()
+    final_content = stripped[closing + len("</think>") :].strip()
+    if not final_content:
+        raise ProviderError("Provider returned reasoning without a final answer.")
+    if "<think>" in final_content or "</think>" in final_content:
+        raise ProviderError("Provider returned nested or repeated inline reasoning blocks.")
+    return final_content, reasoning or None
 
 
 @dataclass(slots=True)
@@ -95,6 +152,7 @@ class OpenAICompatibleProvider:
     base_url: str
     api_key: str = field(repr=False)
     timeout_seconds: int = 300
+    chat_template_kwargs: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         parsed = urlparse(self.base_url)
@@ -111,6 +169,8 @@ class OpenAICompatibleProvider:
             raise ValueError("OpenAI-compatible providers require an API key.")
         if self.timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be positive.")
+        if self.chat_template_kwargs is not None:
+            self.chat_template_kwargs = dict(self.chat_template_kwargs)
         self.base_url = self.base_url.rstrip("/")
 
     def _complete_sync(
@@ -132,6 +192,8 @@ class OpenAICompatibleProvider:
         }
         if json_response:
             payload["response_format"] = {"type": "json_object"}
+        if self.chat_template_kwargs is not None:
+            payload["chat_template_kwargs"] = dict(self.chat_template_kwargs)
         request = urllib.request.Request(
             f"{self.base_url}/chat/completions",
             data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -143,6 +205,7 @@ class OpenAICompatibleProvider:
             method="POST",
         )
         context = ssl.create_default_context()
+        started = time.perf_counter()
         try:
             with urllib.request.urlopen(
                 request,
@@ -157,6 +220,7 @@ class OpenAICompatibleProvider:
         return parse_completion_envelope(
             body,
             requested_model=model,
+            latency_seconds=time.perf_counter() - started,
         )
 
     async def complete(
