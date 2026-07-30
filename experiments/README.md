@@ -5,6 +5,9 @@ and offline pipelines.
 
 - `historical_validation/` reconstructs the checksum-bound July 2026 validation
   snapshot, including its incomplete verifier batch.
+- `model_comparison/` runs fresh, fingerprinted verifier models on the exact
+  100-candidate validation input and evaluates complete score sets through the
+  existing citation gate.
 - `reranker_finetuning/` documents why audited training prototypes are not shipped as
   part of the reported pipeline.
 

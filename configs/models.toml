@@ -23,8 +23,16 @@ reference = "https://huggingface.co/Qwen/Qwen3.6-27B"
 
 [recommended.soofi]
 display_name = "Soofi S"
-provider_example_id = "Soofi-S-Instruct"
-availability = "Early access; no generally downloadable checkpoint as of 2026-07-29"
-role = "German/English model; provider ID is deployment-specific"
+provider = "SOOFI OWU hosted API"
+base_url = "https://soofi-owu.l3s.de/api"
+chat_completions_path = "/chat/completions"
+runtime_model_example = "Soofi-S-RLVR-Isar"
+enable_thinking = false
+credential_environment = "SOOFI_API_KEY"
+credential_policy = "Runtime only; never commit API keys."
+model_identity_policy = "The model ID is runtime-configurable; record the identifier returned by the endpoint for every run."
+availability = "Hosted OpenAI-compatible API; authorized access is required."
+role = "German/English deployment evaluation"
 validated_for_reported_result = false
+new_experiment_only = true
 reference = "https://www.soofi.info/"

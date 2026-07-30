@@ -273,7 +273,7 @@ Requested alternatives are recommendations only; none produced the reported valu
 |---|---|---|
 | DeepSeek V4 Flash | local: `deepseek-ai/DeepSeek-V4-Flash`; provider example: `deepseek/deepseek-v4-flash` | Hosted or local reranking candidate |
 | Qwen3.6-27B | `Qwen/Qwen3.6-27B` | Open-weight local reranking candidate |
-| Soofi S | provider example `Soofi-S-Instruct` | Early access and deployment-specific; no generally downloadable checkpoint recorded as of 2026-07-29 |
+| Soofi S | hosted API runtime model `Soofi-S-RLVR-Isar` | New hosted comparison only; authorized API access is required |
 
 Model labels are not interchangeable. A provider change or model change requires a
 new complete run. See [Models](docs/models.md).

@@ -6,6 +6,7 @@
 | `check_release.py` | Reject credentials, machine-specific paths, generated content, and oversized release files in the worktree and reachable history |
 | `check_distribution.py` | Confirm that the built wheel contains intended packages and no research/runtime data |
 | `clean_generated.py` | Remove known generated caches, builds, and package metadata |
+| `run_soofi_hosted_api.sbatch` | Submit the sequential hosted SOOFI verifier comparison on Neumann |
 
 Run the release and distribution checks from the repository root:
 
