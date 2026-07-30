@@ -1,0 +1,90 @@
+{
+  "false_negatives": 147,
+  "false_positives": 165,
+  "macro_f1": 0.3515048898814921,
+  "macro_precision": 0.3976697418097674,
+  "macro_recall": 0.3677804040103148,
+  "per_query": {
+    "val_001": {
+      "f1": 0.4415584415584416,
+      "false_negatives": 25,
+      "false_positives": 18,
+      "precision": 0.4857142857142857,
+      "recall": 0.40476190476190477,
+      "true_positives": 17
+    },
+    "val_002": {
+      "f1": 0.5384615384615384,
+      "false_negatives": 8,
+      "false_positives": 40,
+      "precision": 0.4117647058823529,
+      "recall": 0.7777777777777778,
+      "true_positives": 28
+    },
+    "val_003": {
+      "f1": 0.3544303797468354,
+      "false_negatives": 33,
+      "false_positives": 18,
+      "precision": 0.4375,
+      "recall": 0.2978723404255319,
+      "true_positives": 14
+    },
+    "val_004": {
+      "f1": 0.3529411764705882,
+      "false_negatives": 7,
+      "false_positives": 4,
+      "precision": 0.42857142857142855,
+      "recall": 0.3,
+      "true_positives": 3
+    },
+    "val_005": {
+      "f1": 0.2962962962962963,
+      "false_negatives": 7,
+      "false_positives": 12,
+      "precision": 0.25,
+      "recall": 0.36363636363636365,
+      "true_positives": 4
+    },
+    "val_006": {
+      "f1": 0.0975609756097561,
+      "false_negatives": 16,
+      "false_positives": 21,
+      "precision": 0.08695652173913043,
+      "recall": 0.1111111111111111,
+      "true_positives": 2
+    },
+    "val_007": {
+      "f1": 0.186046511627907,
+      "false_negatives": 15,
+      "false_positives": 20,
+      "precision": 0.16666666666666666,
+      "recall": 0.21052631578947367,
+      "true_positives": 4
+    },
+    "val_008": {
+      "f1": 0.7346938775510204,
+      "false_negatives": 11,
+      "false_positives": 2,
+      "precision": 0.9,
+      "recall": 0.6206896551724138,
+      "true_positives": 18
+    },
+    "val_009": {
+      "f1": 0.125,
+      "false_negatives": 13,
+      "false_positives": 1,
+      "precision": 0.5,
+      "recall": 0.07142857142857142,
+      "true_positives": 1
+    },
+    "val_010": {
+      "f1": 0.3880597014925373,
+      "false_negatives": 12,
+      "false_positives": 29,
+      "precision": 0.30952380952380953,
+      "recall": 0.52,
+      "true_positives": 13
+    }
+  },
+  "true_positives": 104
+}

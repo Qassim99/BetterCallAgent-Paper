@@ -12,6 +12,37 @@ pipeline instead of maintaining a second implementation:
 This is a new model comparison. It must not be presented as a reconstruction of the
 historical 19-of-20-batch Qwen result.
 
+## Verified Neumann result (2026-07-30)
+
+The complete prompt-v3 run used the full candidate documents without truncation. Both
+the requested and served model identifiers were `Soofi-S-RLVR-Isar`.
+
+| Metric | Value |
+| --- | ---: |
+| Macro F1 | `0.3515048898814921` |
+| Macro precision | `0.3976697418097674` |
+| Macro recall | `0.3677804040103148` |
+| Complete batches / candidates | `20 / 100` |
+| Prompt / completion / total tokens | `981849 / 18805 / 1000654` |
+| Mean / median endpoint latency | `7.9326 s / 7.8237 s` |
+
+The exact aggregate and per-query values are committed in
+[`results/soofi_s_rlvr_isar_metrics.json`](results/soofi_s_rlvr_isar_metrics.json).
+Its SHA-256 is
+`56c5a33465cb3506311b3698e8ca9684982ccb4a5be8c459f1dbd20f5e6e5b68`.
+
+Run provenance: code commit `adf9da01a41bf980326bf09c3dbf59606992073a`,
+configuration SHA-256
+`8baf44744e4d1405f36e41e7c8d78d2b110d8be6f2190d911a082616d8a991c3`,
+reranker-input SHA-256
+`a2624d1c15bf922a542f03e941f5e92219d75176e2e47daac7ca90d8ae5dc374`,
+and score SHA-256
+`6c91581bca315c9c3cfcd471aafe029c7b45147f070f2175707823d83036c2a0`.
+All five pinned evaluation inputs passed preflight. TLS verification remained enabled,
+`enable_thinking` was false, every batch succeeded on its first accepted attempt,
+and neither raw provider envelopes nor the API key were written to run artifacts.
+
+
 ## Hosted model configuration
 
 The endpoint, served model name, and credential are runtime configuration. For the
